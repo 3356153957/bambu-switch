@@ -1,6 +1,6 @@
 # Validation
 
-Verification date: 2026-10-19. Version: 1.1.0.
+Verification date: 2026-10-19. Version: 1.1.1.
 
 - 18 local tests cover isolated profile switching, backups, writer locks, interruption recovery, conflicts, desktop shortcut creation, and adding an account without launching Studio.
 - Tests use temporary directories and fictional session files. They do not use real accounts or send print jobs.

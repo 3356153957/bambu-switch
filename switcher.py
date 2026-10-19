@@ -15,7 +15,7 @@ import sys
 import time
 import uuid
 
-VERSION = "1.1.0"
+VERSION = "1.1.1"
 HIDDEN = 0x08000000 if os.name == "nt" else 0
 
 
@@ -339,20 +339,12 @@ def shortcut(key, name, desktop=None):
     path = desktop / f"Bambu - {name}.lnk"
     if path.exists():
         raise SwitchError(f"桌面已存在同名快捷方式，请先重命名或移走：{path.name}")
-    def quote(value):
-        return "'" + str(value).replace("'", "''") + "'"
-    icon = f"{target},0" if getattr(sys, "frozen", False) else str(Path(__file__).parent / "assets/BambuStudio.ico")
-    script = (f"$w = New-Object -ComObject WScript.Shell; $s = $w.CreateShortcut({quote(path)}); "
-              f"$s.TargetPath = {quote(target)}; $s.Arguments = {quote(args)}; "
-              f"$s.IconLocation = {quote(icon)}; "
-              f"$s.WorkingDirectory = {quote(target.parent)}; $s.Description = 'Bambu Studio profile'; $s.Save()")
-    import base64
-    command = base64.b64encode(script.encode("utf-16le")).decode("ascii")
-    result = subprocess.run(["powershell.exe", "-NoProfile", "-NonInteractive", "-EncodedCommand", command],
-                            capture_output=True, creationflags=HIDDEN)
-    if result.returncode:
-        reason = result.stderr.decode("utf-8", errors="replace").strip()
-        raise SwitchError("无法创建桌面入口：" + (reason[-2000:] or "系统没有返回错误详情。"))
+    from windows_shortcuts import create_shortcut
+    icon = str(target) if getattr(sys, "frozen", False) else str(Path(__file__).parent / "assets/BambuStudio.ico")
+    try:
+        create_shortcut(path, target, args, target.parent, icon)
+    except OSError as exc:
+        raise SwitchError(f"无法创建桌面入口：{exc}") from exc
     if not path.is_file():
         raise SwitchError("快捷方式未生成，请检查桌面权限。")
     return path

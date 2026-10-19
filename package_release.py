@@ -53,7 +53,7 @@ def main():
                 archive.write(file, file.relative_to(dist))
     source = output / f"BambuAccountSwitcher-{VERSION}-source.zip"
     with zipfile.ZipFile(source, "w", zipfile.ZIP_DEFLATED) as archive:
-        for name in ("app.py", "switcher.py", "test_switcher.py", "test_app.py", "build.ps1", "package_release.py",
+        for name in ("app.py", "switcher.py", "windows_shortcuts.py", "test_switcher.py", "test_app.py", "build.ps1", "package_release.py",
                      "requirements-build.txt", "README.md", "README.en.md", "THIRD_PARTY.md", "VALIDATION.md", "LICENSE", ".gitignore", ".github/workflows/build.yml"):
             archive.write(root / name, name)
         for file in sorted((root / "assets").iterdir()):
