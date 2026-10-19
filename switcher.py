@@ -348,8 +348,11 @@ def shortcut(key, name, desktop=None):
               f"$s.WorkingDirectory = {quote(target.parent)}; $s.Description = 'Bambu Studio profile'; $s.Save()")
     import base64
     command = base64.b64encode(script.encode("utf-16le")).decode("ascii")
-    subprocess.run(["powershell.exe", "-NoProfile", "-NonInteractive", "-EncodedCommand", command],
-                   check=True, capture_output=True, creationflags=HIDDEN)
+    result = subprocess.run(["powershell.exe", "-NoProfile", "-NonInteractive", "-EncodedCommand", command],
+                            capture_output=True, creationflags=HIDDEN)
+    if result.returncode:
+        reason = result.stderr.decode("utf-8", errors="replace").strip()
+        raise SwitchError("无法创建桌面入口：" + (reason[-2000:] or "系统没有返回错误详情。"))
     if not path.is_file():
         raise SwitchError("快捷方式未生成，请检查桌面权限。")
     return path
