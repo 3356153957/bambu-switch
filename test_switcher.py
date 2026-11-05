@@ -110,6 +110,27 @@ class ProfileTests(unittest.TestCase):
         self.assertTrue((self.manager.active / "session.txt").is_file())
         self.assertTrue((self.manager.profiles / self.club).is_dir())
         self.assertTrue(list(self.manager.root.glob("state-detached-*.json")))
+        self.assertTrue((self.manager.root / "auto-import-disabled").is_file())
+
+    def test_detach_archive_failure_preserves_state_and_automatic_import_setting(self):
+        original = Path.rename
+        def fail_archive(path, destination):
+            if path == self.manager.state_file:
+                raise PermissionError("synthetic-state-file-lock")
+            return original(path, destination)
+        before = self.manager.state_file.read_bytes()
+        with patch.object(Path, "rename", fail_archive), self.assertRaises(SwitchError):
+            self.manager.detach()
+        self.assertEqual(self.manager.state_file.read_bytes(), before)
+        self.assertFalse((self.manager.root / "auto-import-disabled").exists())
+        self.assertEqual(self.manager.status()["active"], self.home)
+
+    def test_detach_marker_write_failure_keeps_state(self):
+        before = self.manager.state_file.read_bytes()
+        with patch("switcher.atomic_json", side_effect=PermissionError("synthetic-marker-write")), self.assertRaises(SwitchError):
+            self.manager.detach()
+        self.assertEqual(self.manager.state_file.read_bytes(), before)
+        self.assertFalse(list(self.manager.root.glob("state-detached-*.json")))
 
     def test_corrupt_state_preserves_data(self):
         self.manager.state_file.write_text('{"version":42}')

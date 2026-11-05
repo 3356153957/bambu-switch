@@ -14,7 +14,7 @@ Star 为当次取得的页面显示值，可能有缓存延迟。
 Windows EXE 由 PyInstaller 生成，包含 CPython 与 Tcl/Tk 运行库。
 它们分别遵循 PSF License、Tcl/Tk License，以及 PyInstaller GPL 与 Bootloader exception。
 PyInstaller 的 exception 允许分发打包应用；本项目源码采用 MIT。
-发布包的 licenses 目录包含构建使用的 Python LICENSE.txt、Tcl/Tk license.terms
+发布包的 `support/licenses/` 目录包含构建使用的 Python LICENSE.txt、Tcl/Tk license.terms
 以及 PyInstaller 许可证。构建脚本会自动复制这些文本。
 
 ## 拓竹图标

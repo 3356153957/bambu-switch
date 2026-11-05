@@ -11,6 +11,7 @@ output/
 *.lnk
 *.pem
 *.key
+*.bambu-account
 state.json
 pending.json
 state-detached-*.json

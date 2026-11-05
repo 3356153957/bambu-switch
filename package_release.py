@@ -11,6 +11,15 @@ import zipfile
 from switcher import VERSION
 
 
+DOCUMENTS = ("README.md", "README.en.md", "LICENSE", "THIRD_PARTY.md", "VALIDATION.md")
+SOURCE_FILES = (
+    "app.py", "switcher.py", "local_cache.py", "windows_shortcuts.py",
+    "test_switcher.py", "test_app.py", "test_transfer.py", "test_local_cache.py",
+    "build.ps1", "package_release.py", "requirements-build.txt", "使用说明.md",
+    *DOCUMENTS, ".gitignore", ".github/workflows/build.yml",
+)
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--package-only", action="store_true")
@@ -25,36 +34,43 @@ def main():
                         "--name", "BambuAccountSwitcher", "app.py"], cwd=root, check=True)
     if not (dist / "BambuAccountSwitcher.exe").is_file():
         raise RuntimeError("Build the executable before packaging")
-    for filename in ("README.md", "README.en.md", "LICENSE", "THIRD_PARTY.md", "VALIDATION.md"):
-        shutil.copy2(root / filename, dist / filename)
-    (dist / "docs").mkdir(exist_ok=True)
-    shutil.copy2(root / "docs/screenshot.png", dist / "docs/screenshot.png")
-    (dist / "assets").mkdir(exist_ok=True)
-    shutil.copy2(root / "assets/bambu-logo.png", dist / "assets/bambu-logo.png")
-    licenses = dist / "licenses"
-    licenses.mkdir(exist_ok=True)
+    # Keep the launch directory small. Only the explicit files in release_files
+    # enter the archive, even if someone has placed other data in dist locally.
+    release_files = [dist / "BambuAccountSwitcher.exe"]
+
+    def copy_release_file(source, relative):
+        target = dist / relative
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(source, target)
+        release_files.append(target)
+
+    copy_release_file(root / "使用说明.md", Path("使用说明.md"))
+    for filename in DOCUMENTS:
+        copy_release_file(root / filename, Path("support") / filename)
+    for relative in ("docs/screenshot.png", "assets/bambu-logo.png", "assets/BambuStudio.ico",
+                     "assets/BambuStudio-LICENSE.txt"):
+        copy_release_file(root / relative, Path("support") / relative)
+    licenses = Path("support/licenses")
     base = Path(sys.base_prefix)
-    shutil.copy2(base / "LICENSE.txt", licenses / "Python-LICENSE.txt")
+    copy_release_file(base / "LICENSE.txt", licenses / "Python-LICENSE.txt")
     # The bundled Tk notice explicitly applies to all associated files of Tcl/Tk.
-    shutil.copy2(base / "tcl/tk8.6/license.terms", licenses / "Tcl-Tk-license.terms")
-    shutil.copy2(root / "assets/BambuStudio-LICENSE.txt", licenses / "BambuStudio-LICENSE.txt")
+    copy_release_file(base / "tcl/tk8.6/license.terms", licenses / "Tcl-Tk-license.terms")
+    copy_release_file(root / "assets/BambuStudio-LICENSE.txt", licenses / "BambuStudio-LICENSE.txt")
     metadata = importlib.metadata.distribution("pyinstaller")
     for file in metadata.files or []:
         if ".dist-info/licenses/" in str(file).replace("\\", "/"):
             source = Path(metadata.locate_file(file))
             if source.is_file():
-                shutil.copy2(source, licenses / ("PyInstaller-" + source.name))
+                copy_release_file(source, licenses / ("PyInstaller-" + source.name))
     output = root / "output"
     output.mkdir(exist_ok=True)
     binary = output / f"BambuAccountSwitcher-{VERSION}-windows-x64.zip"
     with zipfile.ZipFile(binary, "w", zipfile.ZIP_DEFLATED) as archive:
-        for file in sorted(dist.rglob("*")):
-            if file.is_file():
-                archive.write(file, file.relative_to(dist))
+        for file in sorted(release_files):
+            archive.write(file, file.relative_to(dist))
     source = output / f"BambuAccountSwitcher-{VERSION}-source.zip"
     with zipfile.ZipFile(source, "w", zipfile.ZIP_DEFLATED) as archive:
-        for name in ("app.py", "switcher.py", "windows_shortcuts.py", "test_switcher.py", "test_app.py", "build.ps1", "package_release.py",
-                     "requirements-build.txt", "README.md", "README.en.md", "THIRD_PARTY.md", "VALIDATION.md", "LICENSE", ".gitignore", ".github/workflows/build.yml"):
+        for name in SOURCE_FILES:
             archive.write(root / name, name)
         for file in sorted((root / "assets").iterdir()):
             if file.is_file():
