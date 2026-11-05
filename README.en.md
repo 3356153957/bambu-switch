@@ -52,7 +52,7 @@ Select the desired account whenever you need it, or create a dedicated desktop s
 
 ## Local cache and account sharing
 
-Clicking **读取本机** (Read local cache) attempts to import the configuration and session Studio currently stores locally, with an original backup kept first. A configuration already in the list is not imported again. It cannot recover a previous account after sign-out has removed its cache, or retrieve a cloud login history. Save your work and close Studio before reading or importing its configuration.
+Clicking **读取本机** (Read local cache) attempts to import the configuration and session Studio currently stores locally, with an original backup kept first. For a configuration already in the list, it checks the cache and displays the result without importing it again. It cannot recover a previous account after sign-out has removed its cache, or retrieve a cloud login history. Save your work and close Studio before reading or importing its configuration.
 
 Select a profile, click **导出账号** (Export account), and save a `.bambu-account` file. The recipient can click **导入文件** (Import file) and choose it. Duplicate names receive a suffix; existing profiles are not overwritten. An existing local configuration remains active; if it was not previously managed, it is also backed up and preserved first. On a new computer with no local Studio configuration, the imported profile becomes active. None of these operations launches Studio automatically.
 
@@ -68,7 +68,7 @@ BambuAccountSwitcher.exe        Application
 support/                        Full docs, screenshot, icons, and dependency licenses
 ```
 
-Account data is stored outside the application folder. Moving or updating the EXE does not move profiles. **设置** (Settings) provides the Studio installation, active Studio cache, all profiles, and original backup folders; **更多** (More) provides the selected account's folder.
+Account data is stored outside the application folder. Moving or updating the EXE does not move profiles. **设置** (Settings) shows the application location, lets you select the Studio executable, and opens the active Studio cache, all profiles, and original backup folders. **更多** (More) opens the selected account's folder.
 
 ## Before switching
 
