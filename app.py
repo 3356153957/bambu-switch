@@ -87,11 +87,11 @@ class AccountCards(tk.Frame):
         self.scroll = ttk.Scrollbar(self, orient="vertical", command=self.canvas.yview)
         self.canvas.configure(yscrollcommand=self.scroll.set)
         self.canvas.pack(side="left", fill="both", expand=True)
-        self.scroll.pack(side="right", fill="y")
+        # Packed only while the cards overflow; see update_scroll.
         self.inner = tk.Frame(self.canvas, bg=BG)
         self.window = self.canvas.create_window((0, 0), window=self.inner, anchor="nw")
         self.inner.bind("<Configure>", self.update_scroll)
-        self.canvas.bind("<Configure>", lambda e: self.canvas.itemconfigure(self.window, width=e.width))
+        self.canvas.bind("<Configure>", self.canvas_resized)
         self.canvas.bind("<MouseWheel>", self.wheel)
         self.canvas.bind("<Return>", lambda _: self.activate() if self.enabled else None)
         self.canvas.bind("<Up>", lambda _: self.move(-1))
@@ -102,9 +102,19 @@ class AccountCards(tk.Frame):
             self.canvas.yview_scroll(-int(event.delta / 120), "units")
         return "break"
 
+    def canvas_resized(self, event):
+        self.canvas.itemconfigure(self.window, width=event.width)
+        self.update_scroll()
+
     def update_scroll(self, _=None):
         self.canvas.configure(scrollregion=self.canvas.bbox("all"))
-        if self.inner.winfo_reqheight() <= self.canvas.winfo_height():
+        overflow = self.inner.winfo_reqheight() > self.canvas.winfo_height()
+        shown = bool(self.scroll.winfo_manager())
+        if overflow and not shown:
+            self.scroll.pack(side="right", fill="y", padx=(int(6 * self.scale), 0), before=self.canvas)
+        elif not overflow and shown:
+            self.scroll.pack_forget()
+        if not overflow:
             self.canvas.yview_moveto(0)
 
     def move(self, direction):
@@ -135,7 +145,7 @@ class AccountCards(tk.Frame):
             current = key == self.active
             card = tk.Frame(self.inner, bg=WHITE, highlightbackground="#DEE6E0", highlightthickness=1,
                             padx=u(15), pady=u(12), cursor="hand2")
-            card.pack(fill="x", pady=(0, u(8)), padx=(0, u(6)))
+            card.pack(fill="x", pady=(0, u(8)))
             avatar = tk.Label(card, text=name[0] if name else str(index+1), bg="#E7F6ED" if current else "#EEF1F3",
                               fg=GREEN if current else MUTED, font=("Microsoft YaHei UI", 12, "bold"), width=3, pady=u(5))
             card.columnconfigure(1, weight=1)
@@ -203,7 +213,13 @@ class App:
         style.configure("Primary.TButton", background=GREEN, foreground=WHITE, bordercolor=GREEN)
         style.map("Primary.TButton", background=[("active", "#00753B"), ("disabled", "#BADBC8")],
                   foreground=[("disabled", WHITE)])
-        style.configure("Vertical.TScrollbar", background="#DBE4DD", troughcolor=BG, borderwidth=0, arrowsize=u(10))
+        # A thin flat scrollbar: no arrow buttons or grip, only a rounded-looking thumb.
+        style.layout("Vertical.TScrollbar", [("Vertical.Scrollbar.trough", {"sticky": "ns", "children": [
+            ("Vertical.Scrollbar.thumb", {"expand": "1", "sticky": "nswe"})]})])
+        style.configure("Vertical.TScrollbar", background="#CBD6CE", troughcolor=BG, borderwidth=0,
+                        bordercolor=BG, lightcolor="#CBD6CE", darkcolor="#CBD6CE", gripcount=0, arrowsize=u(7))
+        style.map("Vertical.TScrollbar", background=[("active", "#A9B9AE"), ("pressed", "#8FA396")],
+                  lightcolor=[("active", "#A9B9AE")], darkcolor=[("active", "#A9B9AE")])
         style.configure("TEntry", fieldbackground=WHITE, foreground=INK, bordercolor="#DDE5DF", padding=u(6))
         style.map("TEntry", bordercolor=[("focus", GREEN)])
         self.controls = []

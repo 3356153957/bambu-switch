@@ -113,6 +113,40 @@ class AccountUITests(unittest.TestCase):
                 finally:
                     self.destroy_root(root)
 
+    def test_scrollbar_only_appears_when_accounts_overflow(self):
+        with tempfile.TemporaryDirectory(prefix="bambu-ui-scroll-") as temp:
+            manager = Manager(temp, running=lambda: [])
+            manager.initialize("日常打印")
+            manager.add("工作室")
+            root = tk.Tk()
+            root.withdraw()
+            try:
+                app = App(root, manager, demo=True)
+                root.geometry("800x600+10000+10000")
+                root.deiconify()
+                self.settle(root)
+                self.assertEqual(app.cards.scroll.winfo_manager(), "", "two accounts fit without a scrollbar")
+                card = next(iter(app.cards.rows.values()))
+                self.assertGreaterEqual(card.winfo_width(), app.cards.winfo_width() - 2,
+                                        "cards use the width a hidden scrollbar would take")
+                extra = [manager.add(f"账号 {index}") for index in range(7)]
+                app.refresh()
+                self.settle(root)
+                self.assertEqual(app.cards.scroll.winfo_manager(), "pack", "overflowing accounts show the scrollbar")
+                self.assertNotIn("uparrow", str(ttk.Style().layout("Vertical.TScrollbar")).lower(),
+                                 "the flat scrollbar has no arrow buttons")
+                state = manager.state()
+                for key in extra:
+                    del state["profiles"][key]
+                    (manager.profiles / key).rmdir()
+                from switcher import atomic_json
+                atomic_json(manager.state_file, state)
+                app.refresh()
+                self.settle(root)
+                self.assertEqual(app.cards.scroll.winfo_manager(), "", "the scrollbar hides again when accounts fit")
+            finally:
+                self.destroy_root(root)
+
     def test_themed_input_dialog_fits_long_prompt_and_chinese_actions(self):
         prompt = "为新账号设置名称，添加后选中它启动 Studio，再完成登录。" * 8
         for scaling in (4 / 3, 2, 8 / 3):
