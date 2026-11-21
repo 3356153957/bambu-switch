@@ -154,6 +154,8 @@ class Manager:
             return None
         try:
             data = read_json(self.state_file)
+            if not isinstance(data, dict):
+                raise ValueError()
             if data.get("version") != 1 or not isinstance(data.get("profiles"), dict):
                 raise ValueError()
             if data["active"] not in data["profiles"]:
@@ -183,9 +185,14 @@ class Manager:
             return
         self.idle()
         state = self.state()
-        pending = read_json(self.journal)
-        old, new = pending["from"], pending["to"]
-        if not state or old == new or old not in state["profiles"] or new not in state["profiles"]:
+        try:
+            pending = read_json(self.journal)
+            old, new = pending["from"], pending["to"]
+        except (ValueError, KeyError, TypeError) as exc:
+            # Keep the journal: it is the only record of which move was interrupted.
+            raise SwitchError("中断记录损坏，已停止操作；数据目录已保留，请检查 pending.json。") from exc
+        if (not state or not isinstance(old, str) or not isinstance(new, str) or old == new
+                or old not in state["profiles"] or new not in state["profiles"]):
             raise SwitchError("中断记录异常，已停止操作；数据目录已保留。")
         source, target = self.profiles / old, self.profiles / new
         for path in (self.active, source, target):

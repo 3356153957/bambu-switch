@@ -138,6 +138,23 @@ class ProfileTests(unittest.TestCase):
             self.manager.status()
         self.assertTrue((self.manager.active / "session.txt").is_file())
 
+    def test_non_object_state_reports_clear_error(self):
+        for content in ("[]", '"text"', "null", "{broken"):
+            with self.subTest(content=content):
+                self.manager.state_file.write_text(content, encoding="utf-8")
+                with self.assertRaisesRegex(SwitchError, "配置清单损坏"):
+                    self.manager.status()
+        self.assertTrue((self.manager.active / "session.txt").is_file())
+
+    def test_corrupt_journal_reports_clear_error_and_keeps_it(self):
+        for content in (b"{broken", b"[]", b'{"from": 1}', b'{"to": "x"}', b"\xff"):
+            with self.subTest(content=content):
+                self.manager.journal.write_bytes(content)
+                with self.assertRaisesRegex(SwitchError, "中断记录"):
+                    self.manager.status()
+                self.assertTrue(self.manager.journal.exists())
+        self.assertTrue((self.manager.active / "session.txt").is_file())
+
     def test_missing_profile_does_not_initialize_silently(self):
         (self.manager.profiles / self.club).rmdir()
         with self.assertRaises(SwitchError):
