@@ -1,0 +1,40 @@
+name: 问题反馈 / Bug report
+description: 切换失败、导入导出出错或界面异常 / Switching, import/export or UI problems
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **请勿上传** `.bambu-account` 文件、`%APPDATA%\BambuStudio` 或 `BambuStudioSwitch` 目录中的任何内容：它们可能包含有效的登录会话和打印机访问码。截图前请遮住账号名、邮箱和打印机序列号。
+
+        **Do not attach** `.bambu-account` files or anything from `%APPDATA%\BambuStudio` / `BambuStudioSwitch`; they may contain live sessions and printer access codes.
+  - type: input
+    id: version
+    attributes:
+      label: Bambu Switch 版本 / Version
+      description: 例如 / e.g. 1.2.0
+    validations:
+      required: true
+  - type: input
+    id: studio
+    attributes:
+      label: Bambu Studio 版本 / Studio version
+    validations:
+      required: true
+  - type: input
+    id: windows
+    attributes:
+      label: Windows 版本 / Windows version
+      description: 例如 / e.g. Windows 11 24H2
+  - type: textarea
+    id: what
+    attributes:
+      label: 问题描述与复现步骤 / What happened and how to reproduce
+    validations:
+      required: true
+  - type: textarea
+    id: message
+    attributes:
+      label: 界面提示 / Error message
+      description: 软件底部或弹窗中显示的文字 / Text shown at the bottom of the window or in a dialog
+      render: text
