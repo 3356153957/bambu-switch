@@ -1,6 +1,10 @@
 # Validation
 
-Verification date: 2026-11-05. Version: 1.2.0.
+Verification date: 2026-11-21. Version: 1.2.1.
+
+- 1.2.1: 67 local tests pass, including new checks that a non-object `state.json` and an unreadable or incomplete `pending.json` raise a clear error while keeping the journal file. The release executable is built by GitHub Actions from the tagged commit. The packaged window was not re-inspected for this patch release.
+
+Previous release (2026-11-05, 1.2.0):
 
 - 65 local tests pass. They cover isolated profile switching, backups, writer locks, interruption recovery, conflicts, shortcuts, cache detection and automatic import, persistent opt-out, and account-file import/export.
 - Tests use temporary directories and fictional session files. They do not use real accounts or send print jobs.

@@ -19,7 +19,7 @@ import uuid
 import zipfile
 import zlib
 
-VERSION = "1.2.0"
+VERSION = "1.2.1"
 HIDDEN = 0x08000000 if os.name == "nt" else 0
 
 

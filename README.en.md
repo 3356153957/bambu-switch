@@ -21,6 +21,8 @@ Switching between Bambu Studio accounts can mean repeatedly signing out, signing
 
 The screenshot shows the actual app in demo mode with fictional accounts. In demo mode, **读取本机** (Read local cache) only displays an explanation and does not read real Studio cache files. The application UI is currently in Chinese.
 
+**New in v1.2.1:** a damaged account list or interrupted-switch record now shows a clear message and keeps the file, instead of a raw Python error.
+
 **New in v1.2.0:** a simpler account screen and application folder, consistent dialogs and menus, fixes for clipped text, local login cache detection, and `.bambu-account` file import/export. Existing account data stays in its original location when updating the EXE.
 
 ## Features
@@ -40,7 +42,7 @@ Everyday actions stay beside the account list. Installation, cache, profile, and
 
 Requires **Windows 10 / 11 x64** and the stable release of Bambu Studio. Beta configuration directories are not managed.
 
-1. Download `BambuAccountSwitcher-1.2.0-windows-x64.zip` from [Releases](https://github.com/3356153957/bambu-switch/releases/latest) and extract it to a permanent location.
+1. Download `BambuAccountSwitcher-1.2.1-windows-x64.zip` from [Releases](https://github.com/3356153957/bambu-switch/releases/latest) and extract it to a permanent location.
 2. Save your work, exit Bambu Studio, and run `BambuAccountSwitcher.exe`.
 3. On first launch, a detected local login configuration is backed up and imported automatically. Click **读取本机** (Read local cache) to attempt a manual import of the current configuration.
 4. Click **添加账号** (Add account) for another account, or **导入文件** (Import file) if you received a shared profile.
