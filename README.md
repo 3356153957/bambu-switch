@@ -21,6 +21,8 @@
 
 截图来自实际运行的演示模式，仅展示虚构账号。演示模式中的 **读取本机** 只展示说明，不读取真实的 Studio 缓存。当前软件界面为中文。
 
+**v1.2.2 更新**：账号列表只有放不下时才显示细滚动条，账号较少时卡片占满宽度。
+
 **v1.2.1 更新**：配置清单或切换中断记录损坏时，界面给出明确的中文提示并保留原文件，不再显示 Python 原始报错。
 
 **v1.2.0 更新**：精简账号界面和软件目录，统一弹窗与菜单样式，修复文字遮挡；新增本机登录缓存读取和 `.bambu-account` 账号文件导入导出。已有账号数据继续保留在原位置，无需随 EXE 迁移。
@@ -42,7 +44,7 @@ Studio 自身的登录、云端连接与预设同步仍由 Bambu Studio 处理�
 
 支持 **Windows 10 / 11 x64** 与 Bambu Studio 正式版；不管理 Beta 版配置。
 
-1. 从 [Releases](https://github.com/3356153957/bambu-switch/releases/latest) 下载 `BambuAccountSwitcher-1.2.1-windows-x64.zip`，解压到固定目录。
+1. 从 [Releases](https://github.com/3356153957/bambu-switch/releases/latest) 下载 `BambuAccountSwitcher-1.2.2-windows-x64.zip`，解压到固定目录。
 2. 保存工作并退出 Bambu Studio，然后运行 `BambuAccountSwitcher.exe`。
 3. 首次启动发现本机保存的登录配置时，会先备份再自动导入；也可点击 **读取本机** 手动尝试导入当前配置。
 4. 需要另一个账号时，点击 **添加账号**；已有分享文件时，点击 **导入文件**。

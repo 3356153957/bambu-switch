@@ -1,6 +1,8 @@
 # Validation
 
-Verification date: 2026-11-21. Version: 1.2.1.
+Verification date: 2026-11-21. Version: 1.2.2.
+
+- 1.2.2: 68 local tests pass, including a new check that the account-list scrollbar is packed only while the list overflows and removed again when it fits. The release executable is built by GitHub Actions from the tagged commit.
 
 - 1.2.1: 67 local tests pass, including new checks that a non-object `state.json` and an unreadable or incomplete `pending.json` raise a clear error while keeping the journal file. The release executable is built by GitHub Actions from the tagged commit. The packaged window was not re-inspected for this patch release.
 
