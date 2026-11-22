@@ -8,7 +8,7 @@ from pathlib import Path
 import unittest
 from unittest.mock import patch
 
-from app import App, show_dialog
+from app import AccountCards, App, show_dialog
 from local_cache import inspect_cache
 from switcher import Manager
 
@@ -114,36 +114,41 @@ class AccountUITests(unittest.TestCase):
                     self.destroy_root(root)
 
     def test_scrollbar_only_appears_when_accounts_overflow(self):
+        # Measure the list in a fixed-size window: the main window is clamped to
+        # small screens (for example 1024x768 at 200% on CI), where two accounts
+        # legitimately overflow.
+        def profiles(count):
+            names = {f"p{index}": f"账号 {index}" for index in range(count)}
+            return {"active": "p0", "profiles": names}
+
         with tempfile.TemporaryDirectory(prefix="bambu-ui-scroll-") as temp:
             manager = Manager(temp, running=lambda: [])
             manager.initialize("日常打印")
-            manager.add("工作室")
             root = tk.Tk()
             root.withdraw()
             try:
-                app = App(root, manager, demo=True)
-                root.geometry("800x600+10000+10000")
-                root.deiconify()
-                self.settle(root)
-                self.assertEqual(app.cards.scroll.winfo_manager(), "", "two accounts fit without a scrollbar")
-                card = next(iter(app.cards.rows.values()))
-                self.assertGreaterEqual(card.winfo_width(), app.cards.winfo_width() - 2,
-                                        "cards use the width a hidden scrollbar would take")
-                extra = [manager.add(f"账号 {index}") for index in range(7)]
-                app.refresh()
-                self.settle(root)
-                self.assertEqual(app.cards.scroll.winfo_manager(), "pack", "overflowing accounts show the scrollbar")
+                App(root, manager, demo=True)  # installs the flat scrollbar style
                 self.assertNotIn("uparrow", str(ttk.Style().layout("Vertical.TScrollbar")).lower(),
                                  "the flat scrollbar has no arrow buttons")
-                state = manager.state()
-                for key in extra:
-                    del state["profiles"][key]
-                    (manager.profiles / key).rmdir()
-                from switcher import atomic_json
-                atomic_json(manager.state_file, state)
-                app.refresh()
-                self.settle(root)
-                self.assertEqual(app.cards.scroll.winfo_manager(), "", "the scrollbar hides again when accounts fit")
+                window = tk.Toplevel(root)
+                window.geometry("520x460+10000+10000")
+                cards = AccountCards(window, 1.0, activate=lambda: None)
+                cards.pack(fill="both", expand=True)
+
+                def check(count, shown, message):
+                    cards.set_profiles(profiles(count))
+                    self.settle(root)
+                    fits = cards.inner.winfo_reqheight() <= cards.canvas.winfo_height()
+                    self.assertEqual(fits, not shown, "%s: canvas %d, content %d"
+                                     % (message, cards.canvas.winfo_height(), cards.inner.winfo_reqheight()))
+                    self.assertEqual(cards.scroll.winfo_manager(), "pack" if shown else "", message)
+
+                check(2, False, "two accounts fit without a scrollbar")
+                card = next(iter(cards.rows.values()))
+                self.assertGreaterEqual(card.winfo_width(), cards.winfo_width() - 2,
+                                        "cards use the width a hidden scrollbar would take")
+                check(12, True, "overflowing accounts show the scrollbar")
+                check(2, False, "the scrollbar hides again when accounts fit")
             finally:
                 self.destroy_root(root)
 
